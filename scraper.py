@@ -16,7 +16,7 @@ def scraping(window: QWidget):
     link_next = "https://www.eneba.com/us/store/all?page=1"
     dictionary = {"image":[], "titlePromotion":[], "region":[], "price":[], "whiteList":[], "link":[]}
     counter = 1
-    while(counter < 21):
+    while(counter < 501):
         headers = {"User-Agent": random.choice(user_agents)}
 
         response = requests.get(link_next, headers=headers, timeout=None)
