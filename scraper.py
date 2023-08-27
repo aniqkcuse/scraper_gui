@@ -3,23 +3,28 @@ from PySide6.QtWidgets import QWidget
 import requests
 import random
 import pandas as pd
+from proxy import search_proxies
 
 def scraping(window: QWidget):
-    user_agents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15"]
-
+    get_user_agents = requests.get("https://user-agents.net/", timeout=None)
+    user_agents_html = BeautifulSoup(get_user_agents.content, "lxml")
+    user_agents = []
+    ul_main = user_agents_html.find(class_="agents_list")
+    lis = ul_main.find_all("li")
+    print(lis)
+    for li in lis:
+        user_agents.append(li.text)
+    print(user_agents)
+    proxies = search_proxies(user_agents)
     link_next = "https://www.eneba.com/us/store/all?page=1"
     dictionary = {"image":[], "titlePromotion":[], "region":[], "price":[], "whiteList":[], "link":[]}
     counter = 1
     while(counter < 501):
+        s = requests.Session()
         headers = {"User-Agent": random.choice(user_agents)}
+        proxies_random = {"http": random.choice(proxies)}
 
-        response = requests.get(link_next, headers=headers, timeout=None)
+        response = s.get(link_next, headers=headers, proxies=proxies_random, timeout=None)
         get_content = BeautifulSoup(response.content, "lxml")
 
         divs_content = get_content.find_all("div", class_="pFaGHa")
